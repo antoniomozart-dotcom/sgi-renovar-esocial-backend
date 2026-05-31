@@ -15,7 +15,7 @@ export async function gerarXmlEvento(evento) {
         .ele("ideEvento")
           .ele("tpAmb").txt(evento.ambiente === "producao" ? "1" : "2").up()
           .ele("procEmi").txt("1").up()
-          .ele("verProc").txt("SGI_RENOVAR_SIMULADO_0.2").up()
+          .ele("verProc").txt("SGI_RENOVAR_SIMULADO_0.3").up()
         .up()
         .ele("ideTrabalhador")
           .ele("cpfTrab").txt(String(evento.cpf_trabalhador || "").replace(/\D/g, "")).up()
