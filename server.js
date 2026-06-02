@@ -60,7 +60,7 @@ app.post("/transmitir-s2210", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(
-    `SGI eSocial Service rodando na porta ${PORT}`
+    "SGI eSocial Service rodando na porta"
   );
 });
 ```
