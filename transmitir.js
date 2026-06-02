@@ -1,4 +1,4 @@
-export async function transmitirEvento({ ambiente }) {
+export async function transmitirEvento"./transmitirS2210.js" ({ ambiente }) {
   return {
     status: "enviado",
     ambiente,
