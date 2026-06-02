@@ -1,4 +1,3 @@
-```js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -16,16 +15,13 @@ app.get("/health", (req, res) => {
   res.json({
     ok: true,
     service: "sgi-esocial-service",
-    ambiente:
-      process.env.ESOCIAL_AMBIENTE ||
-      "producao_restrita"
+    ambiente: process.env.ESOCIAL_AMBIENTE || "producao_restrita"
   });
 });
 
 app.post("/transmitir-s2210", async (req, res) => {
   try {
-
-    const { cat_id, evento_id } = req.body;
+    const { cat_id, evento_id } = req.body || {};
 
     if (!cat_id && !evento_id) {
       return res.status(400).json({
@@ -34,34 +30,23 @@ app.post("/transmitir-s2210", async (req, res) => {
       });
     }
 
-    const resultado =
-      await transmitirS2210({
-        cat_id,
-        evento_id
-      });
+    const resultado = await transmitirS2210({
+      cat_id,
+      evento_id
+    });
 
     return res.json(resultado);
 
   } catch (error) {
-
-    console.error(
-      "Erro /transmitir-s2210:",
-      error
-    );
+    console.error("Erro /transmitir-s2210:", error);
 
     return res.status(500).json({
       ok: false,
-      error:
-        error.message ||
-        "Erro interno no serviço eSocial."
+      error: error.message || "Erro interno no serviço eSocial."
     });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(
-   `SGI eSocial Service rodando na porta` 
-  );
+  console.log("SGI eSocial Service rodando na porta " + PORT);
 });
-```
-
