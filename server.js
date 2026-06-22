@@ -11,13 +11,23 @@ const ESOCIAL_AMBIENTE = process.env.ESOCIAL_AMBIENTE || "homologacao";
 app.use(cors());
 app.use(express.json({ limit: "15mb" }));
 
+// Log TODAS as requisições que chegarem
+app.use((req, res, next) => {
+  console.log(`[REQ] ${req.method} ${req.path} — ${new Date().toISOString()}`);
+  next();
+});
+
+app.get("/", (req, res) => {
+  res.json({ ok: true, service: "sgi-esocial-service", versao: "2.3.0" });
+});
+
 app.get("/health", (req, res) => {
   res.json({
     ok: true,
     service: "sgi-esocial-service",
     ambiente: ESOCIAL_AMBIENTE,
-    versao: "2.2.0",
-    eventos_suportados: ["S-2210", "S-2220", "S-2221"],
+    versao: "2.3.0",
+    porta: PORT,
   });
 });
 
@@ -25,7 +35,7 @@ let transmitirEvento = null;
 
 async function handleTransmissao(req, res) {
   if (!transmitirEvento) {
-    return res.status(503).json({ ok: false, error: "Módulo de transmissão ainda carregando. Tente em instantes." });
+    return res.status(503).json({ ok: false, error: "Módulo de transmissão ainda carregando." });
   }
   try {
     const { evento_id, cat_id } = req.body || {};
@@ -44,15 +54,18 @@ app.post("/transmitir-s2210",  handleTransmissao);
 app.post("/transmitir-s2220",  handleTransmissao);
 app.post("/transmitir-s2221",  handleTransmissao);
 
-// Ouve na porta ANTES de carregar transmitir.js
-const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`SGI eSocial Service v2.2 rodando — porta ${PORT} — ambiente: ${ESOCIAL_AMBIENTE}`);
+// Catch-all — qualquer rota não encontrada retorna JSON (não HTML)
+app.use((req, res) => {
+  console.log(`[404] ${req.method} ${req.path}`);
+  res.status(404).json({ ok: false, error: "Rota não encontrada: " + req.path });
 });
 
-// Carrega transmitir.js depois que o servidor já está ouvindo
-import("./transmitir.js").then(mod => {
-  transmitirEvento = mod.transmitirEvento;
-  console.log("[SGI] transmitir.js carregado.");
-}).catch(err => {
-  console.error("[SGI] ERRO ao carregar transmitir.js:", err.message);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`SGI eSocial Service v2.3 — porta ${PORT} — ambiente: ${ESOCIAL_AMBIENTE}`);
+  import("./transmitir.js").then(mod => {
+    transmitirEvento = mod.transmitirEvento;
+    console.log("[SGI] transmitir.js carregado.");
+  }).catch(err => {
+    console.error("[SGI] ERRO transmitir.js:", err.message);
+  });
 });
